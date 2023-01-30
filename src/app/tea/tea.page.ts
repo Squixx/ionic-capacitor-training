@@ -64,7 +64,26 @@ export class TeaPage implements OnInit {
         'short periods of time.',
     },
   ];
-  constructor() {}
+  private toMatrix(tea: Array<Tea>): Array<Array<Tea>> {
+    const matrix: Array<Array<Tea>> = [];
+    let row: Tea[] = [];
+    tea.forEach((t) => {
+      row.push(t);
+      if (row.length === 4) {
+        matrix.push(row);
+        row = [];
+      }
+    });
 
+    if (row.length) {
+      matrix.push(row);
+    }
+
+    return matrix;
+  }
+  constructor() {}
+  get teaMatrix(): Array<Array<Tea>> {
+    return this.toMatrix(this.teaData);
+  }
   ngOnInit() {}
 }

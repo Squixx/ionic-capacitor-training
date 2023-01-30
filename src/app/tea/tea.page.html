@@ -5,15 +5,17 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item *ngFor="let tea of teaData">
-      <ion-card>
-        <ion-img [src]="tea.image"></ion-img>
-        <ion-card-header>
-          <ion-card-title>{{tea.name}}</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>{{tea.description}}</ion-card-content>
-      </ion-card>
-    </ion-item>
-  </ion-list>
+  <ion-grid>
+    <ion-row *ngFor="let teaRow of teaMatrix" class="ion-align-items-stretch">
+      <ion-col *ngFor="let tea of teaRow" size="12" size-md="6" size-xl="3">
+        <ion-card>
+          <ion-img [src]="tea.image"></ion-img>
+          <ion-card-header>
+            <ion-card-title>{{tea.name}}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content> {{tea.description}} </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
