@@ -8,8 +8,12 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'tea',
     pathMatch: 'full',
+  },
+  {
+    path: 'tea',
+    loadChildren: () => import('./tea/tea.module').then((m) => m.TeaPageModule),
   },
 ];
 
