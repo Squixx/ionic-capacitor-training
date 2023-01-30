@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>tea</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let tea of teaData">
+      <ion-card>
+        <ion-img [src]="tea.image"></ion-img>
+        <ion-card-header>
+          <ion-card-title>{{tea.name}}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>{{tea.description}}</ion-card-content>
+      </ion-card>
+    </ion-item>
+  </ion-list>
+</ion-content>
