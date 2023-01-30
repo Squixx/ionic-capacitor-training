@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, Platform } from '@ionic/angular';
+import { By } from '@angular/platform-browser';
+import { createPlatformMock } from '../../../test/mocks';
 
 import { HomePage } from './home.page';
 
@@ -11,6 +13,7 @@ describe('HomePage', () => {
     await TestBed.configureTestingModule({
       declarations: [HomePage],
       imports: [IonicModule.forRoot()],
+      providers: [{ provide: Platform, useFactory: createPlatformMock }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomePage);
@@ -20,5 +23,11 @@ describe('HomePage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  it('displays the correct title', () => {
+    const titles = fixture.debugElement.queryAll(By.css('ion-title'));
+    expect(titles.length).toBe(2);
+    expect(titles[0].nativeElement.textContent.trim()).toBe('Blank');
+    expect(titles[1].nativeElement.textContent.trim()).toBe('Blank');
   });
 });
