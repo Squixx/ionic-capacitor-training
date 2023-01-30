@@ -5,14 +5,15 @@
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
-    "prepare": "husky install",
     "assets": "capacitor-assets generate --iconBackgroundColor '#f1ebe1' --splashBackgroundColor '#f1ebe1' --iconBackgroundColorDark '#110b00' --splashBackgroundColorDark '#110b00'",
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "lint": "ng lint"
+    "build": "ng build --configuration production && cap copy",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
+    "ng": "ng",
+    "prepare": "husky install",
+    "start": "ng serve",
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
