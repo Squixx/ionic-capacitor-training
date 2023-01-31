@@ -6,8 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage {
-  email: string = '';
-  password: string = '';
+  email: string | undefined;
+  password: string | undefined;
 
   constructor() {}
   signIn() {
