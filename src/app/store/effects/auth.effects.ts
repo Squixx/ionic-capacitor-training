@@ -26,6 +26,7 @@ export class AuthEffects {
       ofType(logout),
       exhaustMap((action) =>
         from(this.logout()).pipe(
+          tap(() => this.sessionVault.logout()),
           map(() => logoutSuccess()),
           catchError((error) => of(logoutFailure({ errorMessage: error.message })))
         )
@@ -38,6 +39,15 @@ export class AuthEffects {
       return this.actions$.pipe(
         ofType(loginSuccess),
         tap(() => this.navController.navigateRoot(['/']))
+      );
+    },
+    { dispatch: false }
+  );
+  logoutSuccess$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(logoutSuccess),
+        tap(() => this.navController.navigateRoot(['/', 'login']))
       );
     },
     { dispatch: false }

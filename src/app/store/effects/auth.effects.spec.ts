@@ -4,7 +4,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { createNavControllerMock } from '@test/mocks';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 
-import { login, loginFailure, loginSuccess } from '@app/store/actions';
+import { login, loginFailure, loginSuccess, logout, logoutSuccess } from '@app/store/actions';
 import { Observable, of } from 'rxjs';
 import { AuthEffects } from './auth.effects';
 import { SessionVaultService } from '@app/core';
@@ -134,6 +134,38 @@ describe('AuthEffects', () => {
       effects.loginSuccess$.subscribe(() => {
         expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
         expect(navController.navigateRoot).toHaveBeenCalledWith(['/']);
+        done();
+      });
+    });
+  });
+  describe('logout$', () => {
+    describe('on logout success', () => {
+      it('clears the session from preferences', (done) => {
+        actions$ = of(logout());
+        const sessionVaultService = TestBed.inject(SessionVaultService);
+        effects.logout$.subscribe(() => {
+          expect(sessionVaultService.logout).toHaveBeenCalledTimes(1);
+          done();
+        });
+      });
+      it('dispatches the logout success event', (done) => {
+        actions$ = of(logout());
+        effects.logout$.subscribe((action) => {
+          expect(action).toEqual({
+            type: '[Auth API] logout success',
+          });
+          done();
+        });
+      });
+    });
+  });
+  describe('logoutSuccess$', () => {
+    it('navigates to the login path', (done) => {
+      const navController = TestBed.inject(NavController);
+      actions$ = of(logoutSuccess());
+      effects.logoutSuccess$.subscribe(() => {
+        expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
+        expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
         done();
       });
     });
