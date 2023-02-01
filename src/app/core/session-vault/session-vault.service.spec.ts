@@ -2,12 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { Preferences } from '@capacitor/preferences';
 import { Session } from '@app/models';
 import { SessionVaultService } from './session-vault.service';
+import { provideMockStore } from '@ngrx/store/testing';
+import { Store } from '@ngrx/store';
+import { sessionRestored } from '@app/store/actions';
 
 describe('SessionVaultService', () => {
   let service: SessionVaultService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideMockStore()],
+    });
     service = TestBed.inject(SessionVaultService);
   });
 
@@ -62,6 +67,13 @@ describe('SessionVaultService', () => {
       it('resolves the session', async () => {
         expect(await service.restoreSession()).toEqual(session);
       });
+      it('dispatches session restored', async () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        await service.restoreSession();
+        expect(store.dispatch).toHaveBeenCalledTimes(1);
+        expect(store.dispatch).toHaveBeenCalledWith(sessionRestored({ session }));
+      });
     });
 
     describe('without a session', () => {
@@ -71,6 +83,12 @@ describe('SessionVaultService', () => {
 
       it('resolves null', async () => {
         expect(await service.restoreSession()).toEqual(null);
+      });
+      it('does not dispatch session restored', async () => {
+        const store = TestBed.inject(Store);
+        spyOn(store, 'dispatch');
+        await service.restoreSession();
+        expect(store.dispatch).not.toHaveBeenCalled();
       });
     });
   });

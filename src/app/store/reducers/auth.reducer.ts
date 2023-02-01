@@ -59,5 +59,8 @@ export const reducer = createReducer(
       loading: false,
       errorMessage,
     })
-  )
+  ),
+  on(Actions.sessionRestored, (state, { session }): AuthState => {
+    return { ...state, session };
+  })
 );
