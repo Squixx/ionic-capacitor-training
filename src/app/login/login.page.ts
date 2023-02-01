@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { selectAuthErrorMessage, State } from '@app/store';
 import { login } from '@app/store/actions';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +13,7 @@ export class LoginPage implements OnInit {
   email: string = '';
   password: string = '';
 
-  errorMessage$: Observable<string> | undefined;
+  errorMessage$?: Observable<string> = of('');
   ngOnInit() {
     this.errorMessage$ = this.store.select(selectAuthErrorMessage);
   }

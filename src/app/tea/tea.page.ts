@@ -1,11 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { Tea } from '@app/models';
+import { State } from '@app/store';
+import { logout } from '@app/store/actions';
+import { Store } from '@ngrx/store';
 @Component({
   selector: 'app-tea',
   templateUrl: './tea.page.html',
   styleUrls: ['./tea.page.scss'],
 })
 export class TeaPage implements OnInit {
+  logout() {
+    this.store.dispatch(logout());
+  }
   teaData: Array<Tea> = [
     {
       id: 1,
@@ -81,7 +87,7 @@ export class TeaPage implements OnInit {
 
     return matrix;
   }
-  constructor() {}
+  constructor(private store: Store<State>) {}
   get teaMatrix(): Array<Array<Tea>> {
     return this.toMatrix(this.teaData);
   }
