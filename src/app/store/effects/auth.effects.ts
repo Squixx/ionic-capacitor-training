@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Session } from '@app/models';
-import { login, loginFailure, loginSuccess } from '@app/store/actions';
+import { login, loginFailure, loginSuccess, logout, logoutFailure, logoutSuccess } from '@app/store/actions';
 import { NavController } from '@ionic/angular';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { from, of } from 'rxjs';
@@ -19,6 +19,17 @@ export class AuthEffects {
       )
     );
   });
+  logout$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(logout),
+      exhaustMap((action) =>
+        from(this.logout()).pipe(
+          map(() => logoutSuccess()),
+          catchError((error) => of(logoutFailure({ errorMessage: error.message })))
+        )
+      )
+    );
+  });
 
   loginSuccess$ = createEffect(
     () => {
@@ -29,6 +40,13 @@ export class AuthEffects {
     },
     { dispatch: false }
   );
+  private logout() {
+    return new Promise((resolve, reject) =>
+      setTimeout(() => {
+        resolve({});
+      })
+    );
+  }
   private fakeLogin(email: string, password: string): Promise<Session> {
     return new Promise((resolve, reject) =>
       setTimeout(() => {

@@ -3,6 +3,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@env/*": ["src/environments/*"],
+      "@test/*": ["test/*"],
+      "@capacitor/*": ["__mocks__/@capacitor/*"]
+    },
     "types": ["jasmine"]
   },
   "files": ["src/test.ts", "src/polyfills.ts"],
