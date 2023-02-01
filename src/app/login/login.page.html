@@ -36,6 +36,7 @@
         <div *ngIf="emailInput?.errors?.['email']">E-Mail Address must have a valid format</div>
         <div *ngIf="emailInput?.errors?.['required']">E-Mail Address is required</div>
       </div>
+      <div>{{ errorMessage$ | async }}</div>
       <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched)">
         <div *ngIf="passwordInput?.errors?.['required']">Password is required</div>
       </div>

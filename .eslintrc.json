@@ -41,7 +41,10 @@
     },
     {
       "files": ["*.ts"],
-      "extends": ["plugin:@ngrx/recommended"]
+      "extends": ["plugin:@ngrx/recommended"],
+      "rules": {
+        "ngrx/prefer-effect-callback-in-block-statement": "off"
+      }
     }
   ]
 }

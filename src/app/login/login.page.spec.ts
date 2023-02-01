@@ -1,7 +1,12 @@
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { selectAuthErrorMessage } from '@app/store';
+import { login } from '@app/store/actions';
+import { AuthState, initialState } from '@app/store/reducers/auth.reducer';
 import { IonicModule } from '@ionic/angular';
+import { Store } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 
 import { LoginPage } from './login.page';
 
@@ -15,10 +20,20 @@ describe('LoginPage', () => {
     input.dispatchEvent(event);
     fixture.detectChanges();
   };
+  const click = (button: HTMLElement) => {
+    const event = new Event('click');
+    button.dispatchEvent(event);
+    fixture.detectChanges();
+  };
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [LoginPage],
       imports: [FormsModule, IonicModule],
+      providers: [
+        provideMockStore<{ auth: AuthState }>({
+          initialState: { auth: initialState },
+        }),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);
@@ -108,6 +123,15 @@ describe('LoginPage', () => {
       setInputValue(password, '1234567890');
       expect(button.disabled).toEqual(true);
     });
+    it('dispatches login on click', () => {
+      const store = TestBed.inject(Store);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      setInputValue(email, 'test@test.com');
+      setInputValue(password, 'MyPassW0rd');
+      click(button);
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchSpy).toHaveBeenCalledWith(login({ email: 'test@test.com', password: 'MyPassW0rd' }));
+    });
   });
   describe('error messages', () => {
     let errorDiv: HTMLDivElement;
@@ -145,6 +169,21 @@ describe('LoginPage', () => {
       setInputValue(password, 'test@test.com');
       setInputValue(password, '');
       expect(errorDiv?.textContent?.trim()).toEqual('Password is required');
+    });
+    it('displays the auth state error message if there is one', () => {
+      const store = TestBed.inject(Store) as MockStore;
+      const mockErrorMessageSelector = store.overrideSelector(selectAuthErrorMessage, '');
+      store.refreshState();
+      fixture.detectChanges();
+      expect(errorDiv?.textContent?.trim()).toEqual('');
+      mockErrorMessageSelector.setResult('Invalid Email or Password');
+      store.refreshState();
+      fixture.detectChanges();
+      expect(errorDiv?.textContent?.trim()).toEqual('Invalid Email or Password');
+      mockErrorMessageSelector.setResult('');
+      store.refreshState();
+      fixture.detectChanges();
+      expect(errorDiv?.textContent?.trim()).toEqual('');
     });
   });
 });
