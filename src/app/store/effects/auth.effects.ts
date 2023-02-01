@@ -24,13 +24,9 @@ export class AuthEffects {
   logout$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(logout),
-      exhaustMap((action) =>
-        from(this.logout()).pipe(
-          tap(() => this.sessionVault.logout()),
-          map(() => logoutSuccess()),
-          catchError((error) => of(logoutFailure({ errorMessage: error.message })))
-        )
-      )
+      tap(() => this.sessionVault.logout()),
+      map(() => logoutSuccess()),
+      catchError((error) => of(logoutFailure({ errorMessage: error.message })))
     );
   });
 
@@ -52,13 +48,6 @@ export class AuthEffects {
     },
     { dispatch: false }
   );
-  private logout() {
-    return new Promise((resolve, reject) =>
-      setTimeout(() => {
-        resolve({});
-      })
-    );
-  }
   private fakeLogin(email: string, password: string): Promise<Session> {
     return new Promise((resolve, reject) =>
       setTimeout(() => {
