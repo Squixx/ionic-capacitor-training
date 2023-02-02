@@ -4,11 +4,12 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { createNavControllerMock } from '@test/mocks';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 
-import { login, loginFailure, loginSuccess, logout, logoutSuccess } from '@app/store/actions';
-import { Observable, of } from 'rxjs';
+import { login, loginFailure, loginSuccess, logout, logoutSuccess, unauthError } from '@app/store/actions';
+import { Observable, of, throwError } from 'rxjs';
 import { AuthEffects } from './auth.effects';
-import { SessionVaultService } from '@app/core';
+import { AuthenticationService, SessionVaultService } from '@app/core';
 import { createSessionVaultServiceMock } from '@app/core/testing';
+import { createAuthenticationServiceMock } from '@app/core/authentication/authentication.service.mock';
 describe('AuthEffects', () => {
   let actions$: Observable<any>;
   let effects: AuthEffects;
@@ -23,6 +24,10 @@ describe('AuthEffects', () => {
           provide: SessionVaultService,
           useFactory: createSessionVaultServiceMock,
         },
+        {
+          provide: AuthenticationService,
+          useFactory: createAuthenticationServiceMock,
+        },
       ],
     });
     effects = TestBed.inject(AuthEffects);
@@ -33,7 +38,32 @@ describe('AuthEffects', () => {
   });
 
   describe('login$', () => {
+    it('performs a login operation', (done) => {
+      const auth = TestBed.inject(AuthenticationService);
+      (auth.login as any).and.returnValue(of(undefined));
+      actions$ = of(login({ email: 'test@test.com', password: 'test' }));
+      effects.login$.subscribe(() => {
+        expect(auth.login).toHaveBeenCalledTimes(1);
+        expect(auth.login).toHaveBeenCalledWith('test@test.com', 'test');
+        done();
+      });
+    });
+
     describe('on login success', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.login as any).and.returnValue(
+          of({
+            user: {
+              id: 73,
+              firstName: 'Ken',
+              lastName: 'Sodemann',
+              email: 'test@test.com',
+            },
+            token: '314159',
+          })
+        );
+      });
       it('dispatches login success', (done) => {
         actions$ = of(login({ email: 'test@test.com', password: 'test' }));
         effects.login$.subscribe((action) => {
@@ -72,6 +102,10 @@ describe('AuthEffects', () => {
     });
 
     describe('on login failure', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.login as any).and.returnValue(of(undefined));
+      });
       it('dispatches login error', (done) => {
         actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
         effects.login$.subscribe((action) => {
@@ -88,6 +122,32 @@ describe('AuthEffects', () => {
         effects.login$.subscribe(() => {
           expect(sessionVaultService.login).not.toHaveBeenCalled();
           done();
+        });
+      });
+      describe('on a hard error', () => {
+        beforeEach(() => {
+          const auth = TestBed.inject(AuthenticationService);
+          (auth.login as any).and.returnValue(throwError(new Error('the server is blowing chunks')));
+        });
+
+        it('does not save the session', (done) => {
+          const sessionVaultService = TestBed.inject(SessionVaultService);
+          actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
+          effects.login$.subscribe(() => {
+            expect(sessionVaultService.login).not.toHaveBeenCalled();
+            done();
+          });
+        });
+
+        it('dispatches the login failure event', (done) => {
+          actions$ = of(login({ email: 'test@test.com', password: 'badpass' }));
+          effects.login$.subscribe((action) => {
+            expect(action).toEqual({
+              type: '[Auth API] login failure',
+              errorMessage: 'Unknown error in login',
+            });
+            done();
+          });
         });
       });
     });
@@ -139,6 +199,44 @@ describe('AuthEffects', () => {
     });
   });
   describe('logout$', () => {
+    beforeEach(() => {
+      const auth = TestBed.inject(AuthenticationService);
+      (auth.logout as any).and.returnValue(of(undefined));
+    });
+    it('performs a logout operation', (done) => {
+      const auth = TestBed.inject(AuthenticationService);
+      actions$ = of(logout());
+      effects.logout$.subscribe(() => {
+        expect(auth.logout).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+    describe('on a hard error', () => {
+      beforeEach(() => {
+        const auth = TestBed.inject(AuthenticationService);
+        (auth.logout as any).and.returnValue(throwError(new Error('the server is blowing chunks')));
+      });
+
+      it('does not clear the session from preferences', (done) => {
+        const sessionVaultService = TestBed.inject(SessionVaultService);
+        actions$ = of(logout());
+        effects.logout$.subscribe(() => {
+          expect(sessionVaultService.logout).not.toHaveBeenCalled();
+          done();
+        });
+      });
+
+      it('dispatches the logout failure event', (done) => {
+        actions$ = of(logout());
+        effects.logout$.subscribe((action) => {
+          expect(action).toEqual({
+            type: '[Auth API] logout failure',
+            errorMessage: 'Unknown error in logout',
+          });
+          done();
+        });
+      });
+    });
     describe('on logout success', () => {
       it('clears the session from preferences', (done) => {
         actions$ = of(logout());
@@ -166,6 +264,26 @@ describe('AuthEffects', () => {
       effects.logoutSuccess$.subscribe(() => {
         expect(navController.navigateRoot).toHaveBeenCalledTimes(1);
         expect(navController.navigateRoot).toHaveBeenCalledWith(['/', 'login']);
+        done();
+      });
+    });
+  });
+  describe('unauthError$', () => {
+    it('clears the session from preferences', (done) => {
+      const sessionVaultService = TestBed.inject(SessionVaultService);
+      actions$ = of(unauthError());
+      effects.unauthError$.subscribe(() => {
+        expect(sessionVaultService.logout).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    it('dispatches the logout success event', (done) => {
+      actions$ = of(unauthError());
+      effects.unauthError$.subscribe((action) => {
+        expect(action).toEqual({
+          type: '[Auth API] logout success',
+        });
         done();
       });
     });

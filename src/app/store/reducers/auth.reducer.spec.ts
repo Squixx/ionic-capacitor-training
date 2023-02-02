@@ -6,6 +6,7 @@ import {
   logoutFailure,
   logoutSuccess,
   sessionRestored,
+  unauthError,
 } from '@app/store/actions';
 import { Session } from '@app/models';
 import { initialState, reducer } from './auth.reducer';
@@ -137,6 +138,29 @@ describe('logout actions', () => {
         loading: false,
         errorMessage: '',
       });
+    });
+  });
+  describe('Unauth Error', () => {
+    it('clears the session', () => {
+      const action = unauthError();
+      expect(
+        reducer(
+          {
+            session: {
+              user: {
+                id: 42,
+                firstName: 'Douglas',
+                lastName: 'Adams',
+                email: 'solong@thanksforthefish.com',
+              },
+              token: 'Imalittletoken',
+            },
+            loading: false,
+            errorMessage: '',
+          },
+          action
+        )
+      ).toEqual({ loading: false, errorMessage: '' });
     });
   });
 });

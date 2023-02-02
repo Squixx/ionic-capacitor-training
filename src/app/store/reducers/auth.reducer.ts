@@ -62,5 +62,9 @@ export const reducer = createReducer(
   ),
   on(Actions.sessionRestored, (state, { session }): AuthState => {
     return { ...state, session };
+  }),
+  on(Actions.unauthError, (state): AuthState => {
+    const { session, ...newState } = state;
+    return newState;
   })
 );

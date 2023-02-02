@@ -11,12 +11,16 @@ import { metaReducers, reducers } from './store';
 import { EffectsModule } from '@ngrx/effects';
 import { AuthEffects } from './store/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './core/http-interceptors/auth-interceptor.service';
+import { UnauthInterceptor } from './core/http-interceptors/unauth-interceptor.service';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule,
     IonicModule.forRoot(),
+    HttpClientModule,
     AppRoutingModule,
     StoreModule.forRoot(reducers, {
       metaReducers,
@@ -34,7 +38,11 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
     }),
     EffectsModule.forRoot([AuthEffects]),
   ],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
+  providers: [
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: UnauthInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
